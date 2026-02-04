@@ -1,0 +1,4 @@
+Modelo,Precision,Recall,F1-Score
+Arbol de Decision,0.8,0.8276,0.8136
+SVM,0.8438,0.931,0.8852
+Random Forest,0.8387,0.8966,0.8667
