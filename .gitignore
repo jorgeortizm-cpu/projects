@@ -27,4 +27,4 @@ desktop.ini
 
 # === Archivos excluidos del proyecto ===
 *.docx
-pantalla/5_Generar_Documento.py
+scr/5_Generar_Documento.py
