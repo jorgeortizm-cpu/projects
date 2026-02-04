@@ -1,0 +1,180 @@
+"""
+Preprocesamiento de Datos - Social Network Ads
+- Eliminacion de columnas irrelevantes (User ID)
+- Tratamiento de nulos
+- Codificacion de variables categoricas
+- Escalado de variables numericas
+- Division en conjunto de entrenamiento y prueba (80/20)
+"""
+
+import os
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+
+# --- Configuracion ---
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(BASE_DIR, "Datos", "Social_Network_Ads.csv")
+RESULTS_DIR = os.path.join(BASE_DIR, "results")
+os.makedirs(RESULTS_DIR, exist_ok=True)
+
+# --- Carga de datos ---
+df = pd.read_csv(DATA_PATH)
+print("=" * 60)
+print("PREPROCESAMIENTO DE DATOS")
+print("=" * 60)
+print(f"\nDataset original: {df.shape[0]} filas, {df.shape[1]} columnas")
+print(f"Columnas: {list(df.columns)}")
+
+# =============================================
+# 1. ELIMINACION DE COLUMNAS IRRELEVANTES
+# =============================================
+print("\n" + "-" * 60)
+print("1. ELIMINACION DE COLUMNAS IRRELEVANTES")
+print("-" * 60)
+
+df = df.drop("User ID", axis=1)
+print("Columna 'User ID' eliminada.")
+print(f"Columnas restantes: {list(df.columns)}")
+
+# =============================================
+# 2. TRATAMIENTO DE VALORES NULOS
+# =============================================
+print("\n" + "-" * 60)
+print("2. TRATAMIENTO DE VALORES NULOS")
+print("-" * 60)
+
+nulos = df.isnull().sum()
+total_nulos = nulos.sum()
+print(f"\nValores nulos por columna:\n{nulos}")
+print(f"\nTotal de valores nulos: {total_nulos}")
+
+if total_nulos > 0:
+    # Rellenar numericas con la mediana, categoricas con la moda
+    for col in df.columns:
+        if df[col].isnull().sum() > 0:
+            if df[col].dtype in ["int64", "float64"]:
+                mediana = df[col].median()
+                df[col] = df[col].fillna(mediana)
+                print(f"  -> '{col}' (numerica): nulos reemplazados con mediana = {mediana}")
+            else:
+                moda = df[col].mode()[0]
+                df[col] = df[col].fillna(moda)
+                print(f"  -> '{col}' (categorica): nulos reemplazados con moda = {moda}")
+else:
+    print("No se encontraron valores nulos. No se requiere tratamiento.")
+
+# =============================================
+# 3. CODIFICACION DE VARIABLES CATEGORICAS
+# =============================================
+print("\n" + "-" * 60)
+print("3. CODIFICACION DE VARIABLES CATEGORICAS")
+print("-" * 60)
+
+le = LabelEncoder()
+df["Gender"] = le.fit_transform(df["Gender"])
+print(f"Columna 'Gender' codificada: {dict(zip(le.classes_, le.transform(le.classes_)))}")
+print(f"  Female -> 0, Male -> 1")
+
+print(f"\nDataset tras codificacion:\n{df.head()}")
+
+# =============================================
+# 4. SEPARACION DE FEATURES Y TARGET
+# =============================================
+print("\n" + "-" * 60)
+print("4. SEPARACION DE FEATURES (X) Y TARGET (y)")
+print("-" * 60)
+
+X = df[["Gender", "Age", "EstimatedSalary"]]
+y = df["Purchased"]
+
+print(f"Features (X): {list(X.columns)} -> shape: {X.shape}")
+print(f"Target  (y): Purchased -> shape: {y.shape}")
+print(f"\nDistribucion del target:")
+print(f"  Clase 0 (No Compra): {(y == 0).sum()} ({(y == 0).mean() * 100:.1f}%)")
+print(f"  Clase 1 (Compra):    {(y == 1).sum()} ({(y == 1).mean() * 100:.1f}%)")
+
+# =============================================
+# 5. DIVISION EN ENTRENAMIENTO Y PRUEBA (80/20)
+# =============================================
+print("\n" + "-" * 60)
+print("5. DIVISION EN ENTRENAMIENTO Y PRUEBA (80/20)")
+print("-" * 60)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=42, stratify=y
+)
+
+print(f"Conjunto de entrenamiento: {X_train.shape[0]} muestras ({X_train.shape[0]/len(X)*100:.0f}%)")
+print(f"Conjunto de prueba:        {X_test.shape[0]} muestras ({X_test.shape[0]/len(X)*100:.0f}%)")
+print(f"\nDistribucion del target en entrenamiento:")
+print(f"  Clase 0: {(y_train == 0).sum()} ({(y_train == 0).mean() * 100:.1f}%)")
+print(f"  Clase 1: {(y_train == 1).sum()} ({(y_train == 1).mean() * 100:.1f}%)")
+print(f"\nDistribucion del target en prueba:")
+print(f"  Clase 0: {(y_test == 0).sum()} ({(y_test == 0).mean() * 100:.1f}%)")
+print(f"  Clase 1: {(y_test == 1).sum()} ({(y_test == 1).mean() * 100:.1f}%)")
+
+# =============================================
+# 6. GUARDAR DATOS PREPROCESADOS (sin escalar)
+# =============================================
+print("\n" + "-" * 60)
+print("6. GUARDANDO DATOS PREPROCESADOS (codificados, sin escalar)")
+print("-" * 60)
+
+train_df = X_train.copy()
+train_df["Purchased"] = y_train.values
+
+test_df = X_test.copy()
+test_df["Purchased"] = y_test.values
+
+train_path = os.path.join(RESULTS_DIR, "train_data.csv")
+test_path = os.path.join(RESULTS_DIR, "test_data.csv")
+
+train_df.to_csv(train_path, index=False)
+test_df.to_csv(test_path, index=False)
+
+print(f"  -> {train_path}")
+print(f"  -> {test_path}")
+print(f"\nEjemplo - Primeras 5 filas de train_data.csv:")
+print(train_df.head().to_string())
+
+# =============================================
+# 7. ESCALADO DE VARIABLES NUMERICAS
+# =============================================
+print("\n" + "-" * 60)
+print("7. ESCALADO DE VARIABLES NUMERICAS (StandardScaler)")
+print("-" * 60)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+print("Escalado aplicado a: Gender, Age, EstimatedSalary")
+print(f"\nMedias tras escalado (train): {np.round(X_train_scaled.mean(axis=0), 4)}")
+print(f"Desv. estandar tras escalado (train): {np.round(X_train_scaled.std(axis=0), 4)}")
+
+print(f"\nEjemplo - Primeras 5 filas antes del escalado:")
+print(X_train.head().to_string())
+print(f"\nEjemplo - Primeras 5 filas despues del escalado:")
+print(pd.DataFrame(X_train_scaled[:5], columns=X.columns).to_string())
+
+train_scaled_df = pd.DataFrame(X_train_scaled, columns=X.columns)
+train_scaled_df["Purchased"] = y_train.values
+
+test_scaled_df = pd.DataFrame(X_test_scaled, columns=X.columns)
+test_scaled_df["Purchased"] = y_test.values
+
+train_scaled_path = os.path.join(RESULTS_DIR, "train_data_scaled.csv")
+test_scaled_path = os.path.join(RESULTS_DIR, "test_data_scaled.csv")
+
+train_scaled_df.to_csv(train_scaled_path, index=False)
+test_scaled_df.to_csv(test_scaled_path, index=False)
+
+print(f"\nDatos escalados guardados en:")
+print(f"  -> {train_scaled_path}")
+print(f"  -> {test_scaled_path}")
+
+print("\n" + "=" * 60)
+print("PREPROCESAMIENTO COMPLETADO")
+print("=" * 60)
