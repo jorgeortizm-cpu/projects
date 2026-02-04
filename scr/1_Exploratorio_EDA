@@ -1,0 +1,189 @@
+"""
+Analisis Exploratorio de Datos (EDA) - Social Network Ads
+Descripcion de variables, clases y visualizacion de relaciones.
+"""
+
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# --- Configuracion ---
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(BASE_DIR, "Datos", "Social_Network_Ads.csv")
+RESULTS_DIR = os.path.join(BASE_DIR, "results")
+os.makedirs(RESULTS_DIR, exist_ok=True)
+
+sns.set_theme(style="whitegrid")
+
+# --- Carga de datos ---
+df = pd.read_csv(DATA_PATH)
+
+# =============================================
+# 1. DESCRIPCION DE VARIABLES Y CLASES
+# =============================================
+print("=" * 60)
+print("1. DESCRIPCION DE VARIABLES")
+print("=" * 60)
+
+print("\nPrimeras 5 filas:")
+print(df.head())
+
+print("\nInformacion del dataset:")
+print(df.info())
+
+print("\nEstadisticas descriptivas (variables numericas):")
+print(df.describe())
+
+print("\nValores nulos por columna:")
+print(df.isnull().sum())
+
+print("\nDistribucion de la variable objetivo (Purchased):")
+print(df["Purchased"].value_counts())
+print(f"\nPorcentaje de clase 1 (compra): {df['Purchased'].mean() * 100:.1f}%")
+print(f"Porcentaje de clase 0 (no compra): {(1 - df['Purchased'].mean()) * 100:.1f}%")
+
+print("\nDistribucion por genero:")
+print(df["Gender"].value_counts())
+
+# =============================================
+# 2. VISUALIZACIONES
+# =============================================
+print("\n" + "=" * 60)
+print("2. GENERANDO VISUALIZACIONES")
+print("=" * 60)
+
+# --- 2.1 Distribucion de la variable objetivo ---
+fig, ax = plt.subplots(figsize=(6, 5))
+counts = df["Purchased"].value_counts()
+bars = ax.bar(["No Compra (0)", "Compra (1)"], counts.values,
+              color=["#3498db", "#e74c3c"], edgecolor="black")
+for bar, val in zip(bars, counts.values):
+    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 3,
+            str(val), ha="center", fontweight="bold")
+ax.set_title("Distribucion de la Variable Objetivo (Purchased)")
+ax.set_ylabel("Cantidad de usuarios")
+plt.tight_layout()
+plt.savefig(os.path.join(RESULTS_DIR, "01_distribucion_clase_objetivo.png"), dpi=150)
+plt.close()
+print("  -> 01_distribucion_clase_objetivo.png")
+
+# --- 2.2 Distribucion por genero y clase ---
+fig, ax = plt.subplots(figsize=(7, 5))
+sns.countplot(datos=df, x="Gender", hue="Purchased", palette=["#3498db", "#e74c3c"], ax=ax)
+ax.set_title("Distribucion por Genero y Clase Objetivo")
+ax.set_xlabel("Genero")
+ax.set_ylabel("Cantidad")
+ax.legend(title="Purchased", labels=["No Compra", "Compra"])
+plt.tight_layout()
+plt.savefig(os.path.join(RESULTS_DIR, "02_genero_vs_clase.png"), dpi=150)
+plt.close()
+print("  -> 02_genero_vs_clase.png")
+
+# --- 2.3 Distribucion de Edad ---
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+sns.histplot(datos=df, x="Age", hue="Purchased", kde=True,
+             palette=["#3498db", "#e74c3c"], ax=axes[0])
+axes[0].set_title("Distribucion de Edad por Clase")
+axes[0].set_xlabel("Edad")
+axes[0].set_ylabel("Frecuencia")
+
+sns.boxplot(datos=df, x="Purchased", y="Age",
+            hue="Purchased", palette=["#3498db", "#e74c3c"],
+            legend=False, ax=axes[1])
+axes[1].set_title("Boxplot de Edad por Clase")
+axes[1].set_xticks([0, 1])
+axes[1].set_xticklabels(["No Compra (0)", "Compra (1)"])
+axes[1].set_ylabel("Edad")
+
+plt.tight_layout()
+plt.savefig(os.path.join(RESULTS_DIR, "03_distribucion_edad.png"), dpi=150)
+plt.close()
+print("  -> 03_distribucion_edad.png")
+
+# --- 2.4 Distribucion de Salario Estimado ---
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+sns.histplot(datos=df, x="EstimatedSalary", hue="Purchased", kde=True,
+             palette=["#3498db", "#e74c3c"], ax=axes[0])
+axes[0].set_title("Distribucion de Salario Estimado por Clase")
+axes[0].set_xlabel("Salario Estimado ($)")
+axes[0].set_ylabel("Frecuencia")
+
+sns.boxplot(datos=df, x="Purchased", y="EstimatedSalary",
+            hue="Purchased", palette=["#3498db", "#e74c3c"],
+            legend=False, ax=axes[1])
+axes[1].set_title("Boxplot de Salario Estimado por Clase")
+axes[1].set_xticks([0, 1])
+axes[1].set_xticklabels(["No Compra (0)", "Compra (1)"])
+axes[1].set_ylabel("Salario Estimado ($)")
+
+plt.tight_layout()
+plt.savefig(os.path.join(RESULTS_DIR, "04_distribucion_salario.png"), dpi=150)
+plt.close()
+print("  -> 04_distribucion_salario.png")
+
+# --- 2.5 Matriz de Correlacion ---
+fig, ax = plt.subplots(figsize=(8, 6))
+numeric_df = df.select_dtypes(include=[np.number])
+correlation = numeric_df.corr()
+sns.heatmap(correlation, annot=True, fmt=".2f", cmap="coolwarm",
+            linewidths=0.5, vmin=-1, vmax=1, ax=ax)
+ax.set_title("Matriz de Correlacion")
+plt.tight_layout()
+plt.savefig(os.path.join(RESULTS_DIR, "05_matriz_correlacion.png"), dpi=150)
+plt.close()
+print("  -> 05_matriz_correlacion.png")
+
+# --- 2.6 Pairplot ---
+pairplot_df = df[["Age", "EstimatedSalary", "Purchased"]].copy()
+g = sns.pairplot(pairplot_df, hue="Purchased",
+                 palette=["#3498db", "#e74c3c"],
+                 diag_kind="kde", plot_kws={"alpha": 0.6})
+g.figure.suptitle("Pairplot: Edad vs Salario por Clase", y=1.02)
+g.savefig(os.path.join(RESULTS_DIR, "06_pairplot.png"), dpi=150)
+plt.close()
+print("  -> 06_pairplot.png")
+
+# --- 2.7 Scatter Edad vs Salario coloreado por clase ---
+fig, ax = plt.subplots(figsize=(10, 7))
+scatter = ax.scatter(df["Age"], df["EstimatedSalary"],
+                     c=df["Purchased"], cmap="RdBu_r",
+                     edgecolors="black", alpha=0.7, s=50)
+ax.set_title("Edad vs Salario Estimado (coloreado por Purchased)")
+ax.set_xlabel("Edad")
+ax.set_ylabel("Salario Estimado ($)")
+handles, labels = scatter.legend_elements()
+ax.legend(handles, ["No Compra", "Compra"], title="Purchased")
+plt.tight_layout()
+plt.savefig(os.path.join(RESULTS_DIR, "07_scatter_edad_salario.png"), dpi=150)
+plt.close()
+print("  -> 07_scatter_edad_salario.png")
+
+# --- 2.8 Violin plots ---
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+sns.violinplot(datos=df, x="Purchased", y="Age",
+               hue="Purchased", palette=["#3498db", "#e74c3c"],
+               legend=False, ax=axes[0])
+axes[0].set_title("Violin Plot: Edad por Clase")
+axes[0].set_xticks([0, 1])
+axes[0].set_xticklabels(["No Compra (0)", "Compra (1)"])
+
+sns.violinplot(datos=df, x="Purchased", y="EstimatedSalary",
+               hue="Purchased", palette=["#3498db", "#e74c3c"],
+               legend=False, ax=axes[1])
+axes[1].set_title("Violin Plot: Salario Estimado por Clase")
+axes[1].set_xticks([0, 1])
+axes[1].set_xticklabels(["No Compra (0)", "Compra (1)"])
+
+plt.tight_layout()
+plt.savefig(os.path.join(RESULTS_DIR, "08_violin_plots.png"), dpi=150)
+plt.close()
+print("  -> 08_violin_plots.png")
+
+print("\n" + "=" * 60)
+print("EDA COMPLETADO. Imagenes guardadas en:", RESULTS_DIR)
+print("=" * 60)
