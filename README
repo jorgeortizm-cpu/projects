@@ -38,8 +38,6 @@ Se analizaron las siguientes relaciones:
 
 📈 Ver imágenes en la carpeta `results/` (nombres `01_` a `08_`).
 
-Script que realiza el analisis exploratorio (EDA) del dataset, describiendo variables, clases y generando visualizaciones.
-
 **Funcionalidades:**
 - Descripcion estadistica de variables (tipos, rangos, media, desviacion estandar)
 - Deteccion de valores nulos
