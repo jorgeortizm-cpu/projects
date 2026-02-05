@@ -1,50 +1,42 @@
-# Proyecto: Clasificación técnica mediante SVM y Árboles de Decisión
-# Universidad de Especializades Espiritu Santo
-# Maestria en Inteligencia Artificial
+# 🧠 Clasificación Técnica con SVM y Árboles de Decisión
 
-Repositorio para la materia de **Aprendizaje Automatico** - Maestria en Inteligencia Artificial, UEES.
-
----
-Estudiante: Ingeniero Jorge Ortiz Merchan
-
-Docente: Ingeniera GLADYS MARIA VILLEGAS RUGEL
-
-Fecha de Ultima Actualizacion: 01 Febrero 2026
-
-# Instalacion de Requerimientos: 
-pip install -r "C:\Users\Jorge Ortiz\Desktop\Maestria UEES\APRENDIZAJE AUTOMATICO\Semana 2\Ejercicios\AA_MaestriaUEES-main\requirements.txt"
-
-## Dataset: Social Network Ads
-
-### Dominio
-
-El dataset **Social_Network_Ads.csv** pertenece al dominio de **marketing digital y comportamiento del consumidor en redes sociales**. Contiene informacion de 400 usuarios de una red social, recopilada con el objetivo de predecir si un usuario comprara un producto despues de ver un anuncio publicitario en la plataforma.
-
-Este tipo de datos es comun en estrategias de **publicidad dirigida (targeted advertising)**, donde las empresas buscan identificar el perfil de clientes con mayor probabilidad de compra para optimizar sus campanas y presupuesto publicitario.
-
-### Descripcion de Variables
-
-| Variable | Tipo | Descripcion |
-|---|---|---|
-| `User ID` | Identificador | ID unico del usuario |
-| `Gender` | Categorica | Genero del usuario (Male / Female) |
-| `Age` | Numerica | Edad del usuario (rango: 18 - 60) |
-| `EstimatedSalary` | Numerica | Salario estimado del usuario en dolares (rango: 15,000 - 150,000) |
-| `Purchased` | Categorica (Target) | Indica si el usuario compro el producto (1 = Si, 0 = No) |
-
-### Objetivo
-
-El problema de clasificacion binaria consiste en predecir la variable **Purchased** a partir de las caracteristicas demograficas del usuario (edad y salario estimado). Esto permite a los equipos de marketing:
-
-- Segmentar audiencias de manera mas efectiva.
-- Dirigir anuncios a usuarios con mayor probabilidad de conversion.
-- Reducir costos de adquisicion de clientes.
+### 🎓 Universidad de Especialidades Espíritu Santo (UEES)  
+**Maestría en Inteligencia Artificial**  
+**Materia:** Aprendizaje Automático  
+**Estudiante:** Jorge Ortiz Merchán  
+**Docente:** Ing. Gladys María Villegas Rugel  
+**Fecha de entrega:** Febrero 2026  
 
 ---
 
-## Scripts del Proyecto
+## 🎯 Objetivo del Proyecto
 
-### 1. Analisis Exploratorio de Datos (`scr/1_Exploratorio_EDA.py`)
+Desarrollar, entrenar y comparar clasificadores supervisados (SVM, Árbol de Decisión y Random Forest), aplicados a un caso técnico de detección de patrones en un dataset simulado de comportamiento de usuarios en una red social.
+
+---
+
+## 📊 Dataset Utilizado
+
+**Fuente:** Social_Network_Ads.csv  
+**Descripción:** Datos simulados de usuarios, incluyendo edad, salario estimado, género y si realizaron o no una compra después de ver un anuncio.
+
+**Variables:**
+- `Gender`: Género del usuario (`Male`, `Female`)
+- `Age`: Edad del usuario (18 a 60)
+- `EstimatedSalary`: Salario estimado
+- `Purchased`: Variable objetivo (0 = No compró, 1 = Compró)
+
+---
+
+## 🔍 Análisis Exploratorio (EDA) (`scr/1_Exploratorio_EDA.py`)
+
+Se analizaron las siguientes relaciones:
+- Correlación entre variables numéricas
+- Distribución de clases (`Purchased`)
+- Visualizaciones por género, edad y salario
+- Pairplots, violin plots y scatterplots
+
+📈 Ver imágenes en la carpeta `results/` (nombres `01_` a `08_`).
 
 Script que realiza el analisis exploratorio (EDA) del dataset, describiendo variables, clases y generando visualizaciones.
 
@@ -71,10 +63,14 @@ Script que realiza el analisis exploratorio (EDA) del dataset, describiendo vari
 ![Scatter edad vs salario](results/07_scatter_edad_salario.png)
 
 ![Violin plots](results/08_violin_plots.png)
+---
 
-### 2. Preprocesamiento de Datos (`scr/2_PreProcesamiento.py`)
+## ⚙️ Preprocesamiento de Datos (`scr/2_PreProcesamiento.py`)
 
-Script que prepara los datos para el entrenamiento de modelos de Machine Learning.
+- Codificación binaria de `Gender`
+- Escalado de `Age` y `EstimatedSalary` usando `StandardScaler`
+- División 80% entrenamiento / 20% prueba
+- Dataset sin valores nulos
 
 **Pasos realizados:**
 1. **Eliminacion de columnas irrelevantes** - Se elimina `User ID` por no aportar valor predictivo.
@@ -84,39 +80,27 @@ Script que prepara los datos para el entrenamiento de modelos de Machine Learnin
 5. **Escalado de variables numericas** - StandardScaler aplicado (fit en train, transform en test).
 6. **Exportacion de datos codificados** - `results/train_data.csv` y `results/test_data.csv` (valores legibles).
 7. **Exportacion de datos escalados** - `results/train_data_scaled.csv` y `results/test_data_scaled.csv` (listos para modelos ML).
+---
 
-### 3. Entrenamiento y Evaluacion de Clasificadores (`scr/3_Entrenar_Evaluar.py`)
+## 🤖 Modelos Implementados
 
-Script que entrena y evalua 3 modelos de clasificacion utilizando los datos escalados generados por `2_PreProcesamiento.py`.
+1. **Árbol de Decisión** (`DecisionTreeClassifier`)
+2. **Máquina de Vectores de Soporte (SVM)`** con kernel RBF
+3. **Random Forest** (`RandomForestClassifier`)
 
-**Modelos implementados:**
-1. **Arbol de Decision** - `DecisionTreeClassifier` con `max_depth=4`.
-2. **SVM** - `SVC` con busqueda de hiperparametros via `GridSearchCV` (kernels: linear, rbf, poly | C: 0.1, 1, 10, 100).
-3. **Random Forest** - `RandomForestClassifier` con 100 estimadores y `max_depth=5`.
+Todos los modelos fueron entrenados con los datos escalados y evaluados en el conjunto de prueba.
 
-**Metricas de evaluacion:** Accuracy, Precision, Recall, F1-Score, Curvas ROC (AUC).
+---
 
-**Visualizaciones generadas en `results/`:**
+## 📊 Comparación Experimental
 
-![Matriz confusion - Arbol de Decision](results/09_arbol_decision_confusion_matrix.png)
-
-![Estructura del Arbol de Decision](results/10_arbol_decision_estructura.png)
-
-![Matriz confusion - SVM](results/11_svm_confusion_matrix.png)
-
-![Matriz confusion - Random Forest](results/12_random_forest_confusion_matrix.png)
-
-![Importancia de caracteristicas - Random Forest](results/13_random_forest_importancia.png)
-
-![Comparacion de modelos](results/14_comparacion_modelos.png)
-
-![Curvas ROC](results/15_curvas_roc.png)
-
-### 4. Comparacion Experimental (`scr/4_Comparacion_Experimental.py`)
-
-Script que realiza la comparacion experimental detallada de los 3 modelos con metricas obligatorias y visualizaciones comparativas.
-
-**Metricas obligatorias:** Precision, Recall, F1-Score, Matriz de Confusion.
+Se evaluaron los modelos con las siguientes métricas:
+- **Precisión**
+- **Recall**
+- **F1-score**
+- **Exactitud**
+- **Curvas ROC (AUC)**
+- **Matriz de confusión**
 
 **Funcionalidades:**
 1. **Tabla resumen de metricas** - Exportada como CSV en `results/16_tabla_resumen_metricas.csv`.
@@ -127,14 +111,76 @@ Script que realiza la comparacion experimental detallada de los 3 modelos con me
 6. **Validacion cruzada (5-Fold)** - Boxplot de F1-Score para evaluar estabilidad.
 7. **Fronteras de decision** - Visualizacion 2D (Age vs EstimatedSalary) de las regiones de clasificacion de cada modelo.
 
-**Visualizaciones generadas en `results/`:**
+📌 Ver resultados visuales:
 
-![Matrices de confusion comparativa](results/16_matrices_confusion_comparativa.png)
+- `09_arbol_decision_confusion_matrix.png`
+- `10_arbol_decision_estructura.png`
+- `11_svm_confusion_matrix.png`
+- `12_random_forest_confusion_matrix.png`
+- `13_random_forest_importancia.png`
+- `14_comparacion_modelos.png`
+- `15_curvas_roc.png`
+- `16_matrices_confusion_comparativa.png`
+- `17_barplot_comparacion_metricas.png`
+- `18_heatmap_metricas.png`
+- `19_validacion_cruzada_boxplot.png`
+- `20_fronteras_decision.png`
+---
 
-![Barplot comparacion de metricas](results/17_barplot_comparacion_metricas.png)
+## 📈 Resultados Destacados
 
-![Heatmap de metricas](results/18_heatmap_metricas.png)
+| Modelo          | Precisión Clase 1 | Recall Clase 1 | F1-score Clase 1 | Exactitud |
+|----------------|-------------------|----------------|------------------|-----------|
+| SVM            | ⭐ Alta            | ⭐ Alta        | ⭐ Alta           | >92%      |
+| Random Forest  | Alta              | Alta           | Alta             | >87%      |
+| Árbol Decisión | Media             | Media          | Media            | >82%      |
 
-![Validacion cruzada boxplot](results/19_validacion_cruzada_boxplot.png)
+SVM fue el modelo con mejor rendimiento general.
 
-![Fronteras de decision](results/20_fronteras_decision.png)
+---
+
+## 📁 Estructura del Proyecto
+
+```
+.
+├── notebooks/
+│   └── aa_md_jortiz_semana2.ipynb
+├── src/           ← Código fuente separado por etapas
+│   ├── 1_Exploratorio_EDA/
+│   ├── 2_PreProcesamiento/
+│   ├── 3_Entrenar_Evaluar/
+│   └── 4_Comparacion_Experimental/
+├── Data/
+│   └── Social_Network_Ads
+├── results/
+│   └── *.png, .csv (gráficas, métricas, sets)
+├── README.md
+├── requirements
+└── .gitignore
+```
+
+---
+
+## ✅ Conclusiones Técnicas
+
+- SVM fue el clasificador más eficaz en este caso, con excelente balance entre precisión y recall.
+- La edad fue el predictor más relevante para la compra.
+- El escalado y codificación fueron pasos clave para mejorar el rendimiento.
+- Random Forest también fue robusto y confiable como modelo complementario.
+
+---
+
+## 🧰 Requerimientos Técnicos
+
+Instalación de dependencias:
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 📚 Recursos de Apoyo
+
+- [Scikit-learn](https://scikit-learn.org/)
+- [Seaborn](https://seaborn.pydata.org/)
+- [Buenas prácticas GitHub](https://docs.github.com/en/get-started)
